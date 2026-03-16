@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handle Litt - Admin</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary: #8b7355;
+            --primary-hover: #6f5d45;
+            --danger: #b85450;
+            --edit: #5a7d9a;
+            --edit-hover: #4a6d8a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Bricolage Grotesque', -apple-system, sans-serif;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(139, 115, 85, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(90, 125, 154, 0.05) 0%, transparent 50%),
+                linear-gradient(135deg, #fafaf9 0%, #f5f4f0 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #86868b;
+            font-size: 14px;
+        }
+
+        .login-screen {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 48px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            max-width: 500px;
+            margin: 100px auto;
+        }
+
+        .login-screen h2 {
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+
+        .login-screen p {
+            color: #86868b;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #86868b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-secondary:hover {
+            background: #6e6e73;
+            transform: translateY(-1px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #86868b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+
+        .approval-card {
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .approval-info {
+            flex: 1;
+        }
+
+        .approval-info .type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .type-badge.item {
+            background: #e8ebe8;
+            color: #5a7d9a;
+        }
+
+        .type-badge.category {
+            background: #f0ebe8;
+            color: #8b7355;
+        }
+
+        .approval-info h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+            color: #1d1d1f;
+        }
+
+        .approval-info p {
+            font-size: 13px;
+            color: #86868b;
+            margin-bottom: 0;
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-approve, .btn-reject {
+            flex: 1;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-approve {
+            background: #34c759;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #2db34a;
+        }
+
+        .btn-reject {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #e6352a;
+        }
+
+        .approval-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .approval-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .approval-input, .approval-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        .approval-input:focus, .approval-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #86868b;
+        }
+
+        .empty-state .emoji {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #86868b;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .item-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .item-row {
+            background: #f5f5f7;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-row .name {
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .item-row .category {
+            font-size: 13px;
+            color: #86868b;
+            margin-left: 12px;
+        }
+
+        .item-count {
+            font-size: 12px;
+            color: #86868b;
+            margin-left: 12px;
+            font-weight: 400;
+        }
+
+        .category-row {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-row:hover {
+            background: #e8e8ed;
+            transform: translateX(4px);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #86868b;
+        }
+
+        .breadcrumb-link {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-current {
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .item-row .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            background: none;
+            border: none;
+            padding: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: var(--edit);
+            line-height: 1;
+        }
+
+        .btn-small:hover {
+            color: var(--edit-hover);
+            transform: scale(1.1);
+        }
+
+        .btn-delete {
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            color: #a04440;
+            transform: scale(1.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: #86868b;
+        }
+
+        .logout-btn {
+            background: rgba(217, 119, 6, 0.1);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            float: right;
+            margin-left: 16px;
+        }
+
+        .logout-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .back-btn {
+            background: rgba(217, 119, 6, 0.1);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            float: right;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 16px;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sync-btn {
+            background: rgba(132, 204, 22, 0.1);
+            color: #65a30d;
+            border: 2px solid #65a30d;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            float: right;
+            margin-left: 16px;
+        }
+
+        .sync-btn:hover {
+            background: #65a30d;
+            color: white;
+        }
+
+        .sync-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .item-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .item-row > div:first-child {
+                width: 100%;
+            }
+
+            .item-row .name {
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            .item-row .category {
+                display: block;
+                margin-left: 0;
+            }
+
+            .item-row .actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .btn-small {
+                flex: 1;
+                min-width: calc(50% - 4px);
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                text-align: center;
+                padding-bottom: 20px;
+                position: relative;
+            }
+
+            .back-btn, .logout-btn, .sync-btn {
+                float: none;
+                display: block;
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 14px;
+                margin: 8px 0;
+                position: relative;
+                transform: none;
+                left: auto;
+            }
+
+            .modal-content {
+                margin: 20px;
+                max-width: calc(100% - 40px) !important;
+            }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="loginScreen" class="login-screen">
+            <h2>Handle Litt Admin</h2>
+            <p>Logg inn med Google for å administrere varer og kategorier</p>
+            <button class="btn" onclick="signInWithGoogle()" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto;">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.64 9.20454C17.64 8.56636 17.5827 7.95272 17.4764 7.36363H9V10.845H13.8436C13.635 11.97 13.0009 12.9231 12.0477 13.5613V15.8195H14.9564C16.6582 14.2527 17.64 11.9454 17.64 9.20454Z" fill="#4285F4"/>
+                    <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5613C11.2418 14.1013 10.2109 14.4204 9 14.4204C6.65591 14.4204 4.67182 12.8372 3.96409 10.71H0.957275V13.0418C2.43818 15.9831 5.48182 18 9 18Z" fill="#34A853"/>
+                    <path d="M3.96409 10.71C3.78409 10.17 3.68182 9.59318 3.68182 9C3.68182 8.40682 3.78409 7.83 3.96409 7.29V4.95818H0.957275C0.347727 6.17318 0 7.54773 0 9C0 10.4523 0.347727 11.8268 0.957275 13.0418L3.96409 10.71Z" fill="#FBBC05"/>
+                    <path d="M9 3.57955C10.3214 3.57955 11.5077 4.03364 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01682 0.957275 4.95818L3.96409 7.29C4.67182 5.16273 6.65591 3.57955 9 3.57955Z" fill="#EA4335"/>
+                </svg>
+                Logg inn med Google
+            </button>
+            <div id="loginError" style="margin-top: 16px; color: var(--danger); font-size: 14px; display: none;"></div>
+            <div style="margin-top: 20px;">
+                <a href="index.html" style="color: var(--primary); text-decoration: none; font-size: 15px; font-weight: 500;">← Tilbake til Handle Litt</a>
+            </div>
+        </div>
+
+        <div id="adminPanel" style="display: none;">
+            <div class="header">
+                <button class="logout-btn" onclick="signOut()">Logg ut</button>
+                <button class="sync-btn" onclick="toggleLanguageFeature()" id="langToggleBtn" style="background: rgba(217, 119, 6, 0.1); color: var(--primary); border: 2px solid var(--primary);">🌐 Språkvalg: ❌</button>
+                <button class="sync-btn" onclick="checkDuplicates()" style="background: rgba(132, 204, 22, 0.1); color: #65a30d; border: 2px solid #65a30d;">🔍 Duplikater</button>
+                <button class="sync-btn" onclick="exportDatabase()" id="exportBtn">📥 Eksporter DB</button>
+                <a href="/" class="back-btn">← Til app</a>
+                <h1>Dashboard</h1>
+                <p id="userEmail"></p>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Ventende godkjenninger</h3>
+                    <div class="number" id="pendingCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Godkjente varer</h3>
+                    <div class="number" id="itemsCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Kategorier</h3>
+                    <div class="number" id="categoriesCount">0</div>
+                </div>
+            </div>
+
+            <!-- Duplicates Modal -->
+            <div id="duplicatesModal" class="modal">
+                <div class="modal-content" style="max-width: 700px;">
+                    <h2>🔍 Duplikatsjekk</h2>
+                    <div id="duplicatesReport" style="max-height: 400px; overflow-y: auto; background: #f5f5f7; padding: 16px; border-radius: 8px; margin: 16px 0; font-family: monospace; white-space: pre-wrap; font-size: 13px; line-height: 1.6;"></div>
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button class="btn" id="deleteDuplicatesBtn" style="flex: 1; background: var(--danger); display: none;">Slett duplikater</button>
+                        <button class="btn-secondary" id="closeDuplicatesBtn" style="flex: 1;">Lukk</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Item Modal -->
+            <div id="editItemModal" class="modal">
+                <div class="modal-content" style="max-width: 500px;">
+                    <h2>Rediger vare</h2>
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Norsk navn:</label>
+                        <input type="text" id="editItemNameNo" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px; margin-bottom: 16px;">
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Engelsk navn:</label>
+                        <input type="text" id="editItemNameEn" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px; margin-bottom: 16px;">
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Kategori:</label>
+                        <select id="editItemCategory" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px;">
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button class="btn" id="saveItemBtn" style="flex: 1;">💾 Lagre</button>
+                        <button class="btn-secondary" id="cancelItemBtn" style="flex: 1;">Avbryt</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Category Modal -->
+            <div id="editCategoryModal" class="modal">
+                <div class="modal-content" style="max-width: 500px;">
+                    <h2>Rediger kategori</h2>
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Kategorinavn:</label>
+                        <input type="text" id="editCategoryName" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px; margin-bottom: 16px;">
+
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Emoji:</label>
+                        <input type="text" id="editCategoryEmoji" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px;">
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-top: 20px;">
+                        <button class="btn" id="saveCategoryBtn" style="flex: 1;">💾 Lagre</button>
+                        <button class="btn-secondary" id="cancelCategoryBtn" style="flex: 1;">Avbryt</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Aktive lister</h2>
+                <div style="margin-bottom: 16px; text-align: center;">
+                    <button class="btn" onclick="deleteAllLists()" style="background: var(--danger);">Slett alle lister</button>
+                </div>
+                <div id="sharedListsContainer"></div>
+            </div>
+
+            <div class="section" id="pendingSection">
+                <h2>Ventende godkjenninger</h2>
+                <div id="pendingList"></div>
+            </div>
+
+            <div class="section">
+                <h2>➕ Legg til ny vare</h2>
+                <div style="background: rgba(132, 204, 22, 0.05); padding: 20px; border-radius: 12px; border: 2px solid rgba(132, 204, 22, 0.2);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1d1d1f;">Varenavn (norsk):</label>
+                            <input type="text" id="newItemName" placeholder="f.eks. potetgull" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px;" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('newItemNameEn').focus();}">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1d1d1f;">Varenavn (engelsk):</label>
+                            <input type="text" id="newItemNameEn" placeholder="e.g. potato chips" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px;" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('newItemCategory').focus();}">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #1d1d1f;">Kategori:</label>
+                            <select id="newItemCategory" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px; background: white;" onkeydown="if(event.key==='Enter'){event.preventDefault();addNewItem();}">
+                                <option value="">Velg kategori...</option>
+                                <option value="Laktosefri/Glutenfri">Laktosefri/Glutenfri</option>
+                                <option value="Frukt & Grønt">Frukt & Grønt</option>
+                                <option value="Kjøtt & Fisk">Kjøtt & Fisk</option>
+                                <option value="Pålegg">Pålegg</option>
+                                <option value="Meieri & Kjøl">Meieri & Kjøl</option>
+                                <option value="Brød & Bakervarer">Brød & Bakervarer</option>
+                                <option value="Tørrvarelager & Hermetikk">Tørrvarelager & Hermetikk</option>
+                                <option value="Fryste varer">Fryste varer</option>
+                                <option value="Urter & Krydder">Urter & Krydder</option>
+                                <option value="Drikke">Drikke</option>
+                                <option value="Godteri & Snacks">Godteri & Snacks</option>
+                                <option value="Husholdning & Rengjøring">Husholdning & Rengjøring</option>
+                                <option value="Vinmonopolet">Vinmonopolet</option>
+                                <option value="Kontorartikler">Kontorartikler</option>
+                                <option value="Elektronikk">Elektronikk</option>
+                                <option value="Apotek">Apotek</option>
+                                <option value="Baby">Baby</option>
+                                <option value="Diverse">Diverse</option>
+                                <option value="Møbelbutikk">Møbelbutikk</option>
+                                <option value="Skredder">Skredder</option>
+                                <option value="Bensinstasjon">Bensinstasjon</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addNewItem()" id="addItemBtn" style="width: 100%;">➕ Legg til vare</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('items')">Varer</button>
+                    <button class="tab" onclick="switchTab('categories')">Kategorier</button>
+                </div>
+
+                <div id="itemsTab">
+                    <div style="margin-bottom: 16px;">
+                        <input type="text" id="searchItems" placeholder="Søk etter varer..." style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 15px;">
+                    </div>
+                    <div id="itemsList" class="item-list"></div>
+                </div>
+
+                <div id="categoriesTab" style="display: none;">
+                    <div id="categoriesList" class="item-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingScreen" class="loading">
+            <p>Laster...</p>
+        </div>
+    </div>
+
+    <script>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let allItems = [];
+        let allCategories = [];
+        let pendingApprovalsDocs = []; // Hold pending approvals for re-rendering
+        let currentView = 'all'; // 'all' | 'category'
+        let selectedCategory = null;
+        let savedApprovalSelections = {}; // Lagre brukerens valg mellom re-renders
+
+        // DATABASE - This will be synced to Firestore
+        const DATABASE = {
+            // Copy from index.html - fetched on demand
+        };
+
+        // GODKJENTE ADMIN-EMAILS - Kun disse kan logge inn
+        const ALLOWED_ADMIN_EMAILS = [
+            'haugejohnsen@gmail.com'  // Legg til flere emails her ved behov
+        ];
+
+        document.getElementById('loadingScreen').style.display = 'none';
+
+        // Check auth state on page load
+        auth.onAuthStateChanged(user => {
+            if (user && ALLOWED_ADMIN_EMAILS.includes(user.email)) {
+                // Valid admin user logged in
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('userEmail').textContent = user.email;
+                loadData();
+            } else if (user) {
+                // Logged in but not authorized
+                showLoginError('Din email har ikke admin-tilgang');
+                auth.signOut();
+            } else {
+                // Not logged in
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+            }
+        });
+
+        async function signInWithGoogle() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+
+                // Check if user email is in allowed list
+                if (!ALLOWED_ADMIN_EMAILS.includes(user.email)) {
+                    showLoginError('Din email har ikke admin-tilgang. Kontakt administrator.');
+                    await auth.signOut();
+                    return;
+                }
+
+                // Success - onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error('Login error:', error);
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showLoginError('Innlogging feilet: ' + error.message);
+                }
+            }
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        async function signOut() {
+            await auth.signOut();
+            document.getElementById('userEmail').textContent = '';
+        }
+
+        async function exportDatabase() {
+            const exportBtn = document.getElementById('exportBtn');
+            exportBtn.disabled = true;
+            exportBtn.textContent = '⏳ Eksporterer...';
+
+            try {
+                // Hent alle godkjente varer fra Firestore
+                const snapshot = await db.collection('globalItems')
+                    .where('approved', '==', true)
+                    .get();
+
+                // Grupper varer per kategori
+                const database = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const category = data.category;
+                    const itemName = data.name_no;
+
+                    if (!database[category]) {
+                        database[category] = [];
+                    }
+                    database[category].push(itemName);
+                });
+
+                // Sorter kategorier og varer alfabetisk
+                const sortedDatabase = {};
+                Object.keys(database).sort().forEach(category => {
+                    sortedDatabase[category] = database[category].sort();
+                });
+
+                // Generer JavaScript-fil med DATABASE-konstant
+                const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                const totalItems = snapshot.size;
+
+                let jsContent = `// Handle Litt Database Backup\n`;
+                jsContent += `// Eksportert: ${timestamp}\n`;
+                jsContent += `// Antall varer: ${totalItems}\n\n`;
+                jsContent += `const DATABASE = ${JSON.stringify(sortedDatabase, null, 4)};\n`;
+
+                // Last ned fil
+                const blob = new Blob([jsContent], { type: 'text/javascript' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `handle-litt-database-${timestamp}.js`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                exportBtn.textContent = '✅ Eksportert!';
+                setTimeout(() => {
+                    exportBtn.textContent = '📥 Eksporter DB';
+                    exportBtn.disabled = false;
+                }, 2000);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Feil ved eksport: ' + error.message);
+                exportBtn.textContent = '📥 Eksporter DB';
+                exportBtn.disabled = false;
+            }
+        }
+
+        function handleNewItemEnter() {
+            // Ikke lenger nødvendig, da Enter navigerer gjennom feltene
+        }
+
+        async function addNewItem() {
+            const nameInput = document.getElementById('newItemName');
+            const nameEnInput = document.getElementById('newItemNameEn');
+            const categorySelect = document.getElementById('newItemCategory');
+            const addBtn = document.getElementById('addItemBtn');
+
+            const name = nameInput.value.trim().toLowerCase();
+            const nameEn = nameEnInput.value.trim().toLowerCase() || name;
+            const category = categorySelect.value;
+
+            // Validering
+            if (!name) {
+                alert('Vennligst skriv inn et varenavn (norsk)');
+                nameInput.focus();
+                return;
+            }
+
+            if (!category) {
+                alert('Vennligst velg en kategori');
+                categorySelect.focus();
+                return;
+            }
+
+            addBtn.disabled = true;
+            addBtn.textContent = '⏳ Legger til...';
+
+            try {
+                // Sjekk om varen allerede finnes
+                const existing = await db.collection('globalItems')
+                    .where('name_no', '==', name)
+                    .where('category', '==', category)
+                    .limit(1)
+                    .get();
+
+                if (!existing.empty) {
+                    alert(`"${name}" finnes allerede i kategorien "${category}"`);
+                    addBtn.textContent = '➕ Legg til vare';
+                    addBtn.disabled = false;
+                    return;
+                }
+
+                // Legg til varen
+                await db.collection('globalItems').add({
+                    name_no: name,
+                    name_en: nameEn,
+                    category: category,
+                    approved: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Oppdater database-versjon
+                const metadataRef = db.collection('metadata').doc('database');
+                const metadataDoc = await metadataRef.get();
+                const currentVersion = metadataDoc.exists ? (metadataDoc.data().databaseVersion || 1) : 1;
+                const newVersion = currentVersion + 1;
+
+                await metadataRef.set({
+                    databaseVersion: newVersion,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                    totalItems: firebase.firestore.FieldValue.increment(1)
+                }, { merge: true });
+
+                console.log(`✅ "${name}" lagt til i "${category}" (database v${newVersion})`);
+
+                // Tøm feltene
+                nameInput.value = '';
+                nameEnInput.value = '';
+                categorySelect.value = '';
+
+                addBtn.textContent = '✅ Lagt til!';
+                setTimeout(() => {
+                    addBtn.textContent = '➕ Legg til vare';
+                    addBtn.disabled = false;
+                }, 2000);
+
+                // Oppdater listen
+                loadData();
+
+            } catch (error) {
+                console.error('Error adding item:', error);
+                alert('Feil ved å legge til vare: ' + error.message);
+                addBtn.textContent = '➕ Legg til vare';
+                addBtn.disabled = false;
+            }
+        }
+
+        // Setup global ESC key handler
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Close modals
+                const modals = document.querySelectorAll('.modal.active');
+                if (modals.length > 0) {
+                    modals.forEach(modal => modal.classList.remove('active'));
+                    return;
+                }
+
+                // Clear "Legg til vare" fields
+                const newItemName = document.getElementById('newItemName');
+                const newItemCategory = document.getElementById('newItemCategory');
+                if (newItemName && (newItemName.value || newItemCategory.value)) {
+                    newItemName.value = '';
+                    newItemCategory.value = '';
+                    newItemName.focus();
+                }
+            }
+        });
+
+        function loadData() {
+            console.log('🔄 Loading admin data...');
+
+            // Update UI
+            updateLanguageToggleButton();
+
+            // Load categories first (needed for approvals)
+            db.collection('globalCategories')
+                .where('approved', '==', true)
+                .orderBy('order')
+                .onSnapshot(snapshot => {
+                    console.log(`✅ Loaded ${snapshot.size} categories`);
+                    document.getElementById('categoriesCount').textContent = snapshot.size;
+                    allCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderCategories(allCategories);
+
+                    // Re-render pending approvals hvis de er lastet
+                    if (pendingApprovalsDocs.length > 0) {
+                        console.log('Categories loaded, re-rendering pending approvals');
+                        renderPendingApprovals(pendingApprovalsDocs);
+                    }
+                }, error => {
+                    console.error('❌ Error loading categories:', error);
+                });
+
+            // Load pending approvals
+            db.collection('pendingApprovals')
+                .where('status', '==', 'pending')
+                .orderBy('submittedAt', 'desc')
+                .onSnapshot(snapshot => {
+                    console.log(`✅ Loaded ${snapshot.size} pending approvals`);
+                    document.getElementById('pendingCount').textContent = snapshot.size;
+                    pendingApprovalsDocs = snapshot.docs;
+                    renderPendingApprovals(pendingApprovalsDocs);
+                }, error => {
+                    console.error('❌ Error loading pending approvals:', error);
+                    // Prøv uten orderBy hvis det feiler
+                    console.log('🔄 Trying without orderBy...');
+                    db.collection('pendingApprovals')
+                        .where('status', '==', 'pending')
+                        .onSnapshot(snapshot => {
+                            console.log(`✅ Loaded ${snapshot.size} pending approvals (no orderBy)`);
+                            document.getElementById('pendingCount').textContent = snapshot.size;
+                            pendingApprovalsDocs = snapshot.docs;
+                            renderPendingApprovals(pendingApprovalsDocs);
+                        }, error2 => {
+                            console.error('❌ Error loading pending approvals (2nd attempt):', error2);
+                        });
+                });
+
+            // Load items
+            db.collection('globalItems')
+                .where('approved', '==', true)
+                .orderBy('category')
+                .onSnapshot(snapshot => {
+                    document.getElementById('itemsCount').textContent = snapshot.size;
+                    allItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderItems(allItems);
+                });
+
+            // Load shared lists
+            loadSharedLists();
+
+            // Setup event listeners (only once)
+            if (!window.listenersSetup) {
+                document.getElementById('deleteDuplicatesBtn').addEventListener('click', deleteDuplicatesFromModal);
+                document.getElementById('closeDuplicatesBtn').addEventListener('click', closeDuplicatesModal);
+                document.getElementById('saveItemBtn').addEventListener('click', saveItemEdit);
+                document.getElementById('cancelItemBtn').addEventListener('click', closeEditItemModal);
+                document.getElementById('saveCategoryBtn').addEventListener('click', saveCategoryEdit);
+                document.getElementById('cancelCategoryBtn').addEventListener('click', closeEditCategoryModal);
+                window.listenersSetup = true;
+            }
+        }
+
+        function loadSharedLists() {
+            db.collection('sharedLists')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(snapshot => {
+                    renderSharedLists(snapshot.docs);
+                });
+        }
+
+        function renderSharedLists(docs) {
+            const container = document.getElementById('sharedListsContainer');
+
+            if (docs.length === 0) {
+                container.innerHTML = '<p style="color: #86868b; text-align: center; padding: 20px;">Ingen aktive delte lister</p>';
+                return;
+            }
+
+            container.innerHTML = docs.map(doc => {
+                const data = doc.data();
+                const listId = doc.id;
+                const shareCode = data.shareCode || '';
+                const createdAt = data.createdAt?.toDate();
+
+                // Calculate time alive
+                let timeAlive = '';
+                if (createdAt) {
+                    const now = new Date();
+                    const diffMs = now - createdAt;
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffDays = Math.floor(diffHours / 24);
+
+                    if (diffDays > 0) {
+                        timeAlive = `${diffDays} dag${diffDays === 1 ? '' : 'er'}`;
+                    } else {
+                        timeAlive = `${diffHours} time${diffHours === 1 ? '' : 'r'}`;
+                    }
+                } else {
+                    timeAlive = 'Ukjent alder';
+                }
+
+                // Count items
+                const items = data.items || {};
+                const totalItems = Object.keys(items).length;
+                const checkedItems = Object.values(items).filter(item => item.checked).length;
+
+                return `
+                    <div style="background: white; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                            <div>
+                                <h3 style="margin: 0 0 8px 0; font-size: 17px; font-weight: 600;">${shareCode}</h3>
+                                <p style="margin: 0; color: #86868b; font-size: 14px;">Aktiv i ${timeAlive}</p>
+                                <p style="margin: 4px 0 0 0; color: #86868b; font-size: 14px;">
+                                    ${totalItems} vare${totalItems === 1 ? '' : 'r'}
+                                    ${totalItems > 0 ? `(${checkedItems} sjekket av)` : ''}
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button
+                                    onclick="deactivateList('${listId}', '${shareCode}')"
+                                    style="padding: 8px 16px; background: #ff9500; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                                    Deaktiver
+                                </button>
+                                <button
+                                    onclick="deleteList('${listId}', '${shareCode}')"
+                                    style="padding: 8px 16px; background: #ff3b30; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                                    Slett
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function deactivateList(listId, shareCode) {
+            if (!confirm(`Er du sikker på at du vil deaktivere listen "${shareCode}"?\n\nListen vil bli satt til inaktiv, men kan reaktiveres senere.`)) {
+                return;
+            }
+
+            try {
+                await db.collection('sharedLists').doc(listId).update({
+                    active: false,
+                    deactivatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log(`✅ Liste "${shareCode}" deaktivert`);
+            } catch (error) {
+                console.error('Error deactivating list:', error);
+                alert('Feil ved deaktivering: ' + error.message);
+            }
+        }
+
+        async function deleteList(listId, shareCode) {
+            if (!confirm(`Er du sikker på at du vil SLETTE listen "${shareCode}"?\n\nDenne handlingen kan IKKE angres!`)) {
+                return;
+            }
+
+            try {
+                await db.collection('sharedLists').doc(listId).delete();
+                console.log(`✅ Liste "${shareCode}" slettet`);
+            } catch (error) {
+                console.error('Error deleting list:', error);
+                alert('Feil ved sletting: ' + error.message);
+            }
+        }
+
+        async function deleteAllLists() {
+            // First confirmation
+            if (!confirm('Er du sikker på at du vil SLETTE ALLE aktive delte lister?\n\nDette vil slette alle lister permanent!')) {
+                return;
+            }
+
+            // Second confirmation (extra safety)
+            if (!confirm('SISTE ADVARSEL!\n\nDette vil slette ALLE delte lister og kan IKKE angres.\n\nEr du helt sikker?')) {
+                return;
+            }
+
+            try {
+                const snapshot = await db.collection('sharedLists').get();
+                const totalLists = snapshot.size;
+
+                if (totalLists === 0) {
+                    alert('Ingen lister å slette');
+                    return;
+                }
+
+                // Delete all lists in a batch
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+
+                await batch.commit();
+                console.log(`✅ ${totalLists} liste${totalLists === 1 ? '' : 'r'} slettet`);
+                alert(`${totalLists} liste${totalLists === 1 ? '' : 'r'} slettet`);
+            } catch (error) {
+                console.error('Error deleting all lists:', error);
+                alert('Feil ved sletting av lister: ' + error.message);
+            }
+        }
+
+        function renderPendingApprovals(docs) {
+            console.log(`📋 Rendering ${docs.length} pending approvals`);
+            const container = document.getElementById('pendingList');
+            const section = document.getElementById('pendingSection');
+
+            if (docs.length === 0) {
+                console.log('ℹ️ No pending approvals to show');
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+
+            // Initialiser savedApprovalSelections for nye godkjenninger
+            docs.forEach(doc => {
+                if (!savedApprovalSelections[doc.id]) {
+                    const data = doc.data();
+                    savedApprovalSelections[doc.id] = {
+                        category: data.data.category || '',
+                        enTranslation: ''
+                    };
+                }
+            });
+
+            console.log('Rendering approvals, allCategories loaded:', allCategories.length > 0, 'count:', allCategories.length);
+
+            container.innerHTML = docs.map(doc => {
+                const data = doc.data();
+                const typeBadge = data.type === 'item'
+                    ? '<span class="type-badge item">Vare</span>'
+                    : '<span class="type-badge category">Kategori</span>';
+
+                const details = data.type === 'item'
+                    ? `Kategori: ${data.data.category}`
+                    : `Emoji: ${data.data.emoji}`;
+
+                const categoryDropdown = data.type === 'item' && allCategories.length > 0 ? `
+                    <div class="approval-field">
+                        <label class="approval-label">Kategori:</label>
+                        <select id="category-${doc.id}" class="approval-select">
+                            ${allCategories.map(cat => `
+                                <option value="${cat.name_no}" ${cat.name_no === data.data.category ? 'selected' : ''}>
+                                    ${cat.name_no}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                ` : (data.type === 'item' ? `
+                    <div class="approval-field">
+                        <label class="approval-label">Kategori:</label>
+                        <p style="color: #86868b; font-size: 13px;">Laster kategorier...</p>
+                    </div>
+                ` : '');
+
+                return `
+                    <div class="approval-card">
+                        <div class="approval-info">
+                            ${typeBadge}
+                            <h3>${data.data.name_no}</h3>
+                            <p>${details}</p>
+                        </div>
+                        ${categoryDropdown}
+                        <div class="approval-field">
+                            <label class="approval-label">Engelsk oversettelse (valgfri):</label>
+                            <input
+                                type="text"
+                                id="en-translation-${doc.id}"
+                                placeholder="English translation..."
+                                class="approval-input"
+                            >
+                        </div>
+                        <div class="approval-actions">
+                            <button class="btn-approve" onclick="approveItem('${doc.id}', '${data.type}')">✓ Godkjenn</button>
+                            <button class="btn-reject" onclick="rejectItem('${doc.id}')">✗ Avslå</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Vent til neste event loop for å sikre at DOM er ferdig rendret
+            setTimeout(() => {
+                // Restore saved selections after re-rendering og sett opp event listeners
+                docs.forEach(doc => {
+                    const categorySelect = document.getElementById(`category-${doc.id}`);
+                    const enInput = document.getElementById(`en-translation-${doc.id}`);
+
+                    console.log('Setting up listeners for', doc.id, 'categorySelect exists:', !!categorySelect);
+
+                    // Gjenopprett lagrede verdier
+                    if (savedApprovalSelections[doc.id]) {
+                        if (categorySelect) {
+                            categorySelect.value = savedApprovalSelections[doc.id].category;
+                        }
+                        if (enInput) {
+                            enInput.value = savedApprovalSelections[doc.id].enTranslation;
+                        }
+                    }
+
+                    // Legg til event listeners for å lagre endringer
+                    if (categorySelect) {
+                        categorySelect.addEventListener('change', (e) => {
+                            if (!savedApprovalSelections[doc.id]) {
+                                savedApprovalSelections[doc.id] = { category: '', enTranslation: '' };
+                            }
+                            savedApprovalSelections[doc.id].category = e.target.value;
+                            console.log('Category changed for', doc.id, 'to', e.target.value);
+                        });
+                    }
+
+                    if (enInput) {
+                        enInput.addEventListener('input', (e) => {
+                            if (!savedApprovalSelections[doc.id]) {
+                                savedApprovalSelections[doc.id] = { category: '', enTranslation: '' };
+                            }
+                            savedApprovalSelections[doc.id].enTranslation = e.target.value;
+                        });
+                    }
+                });
+            }, 0);
+        }
+
+        async function approveItem(approvalId, type) {
+            try {
+                const approvalDoc = await db.collection('pendingApprovals').doc(approvalId).get();
+                const data = approvalDoc.data();
+
+                // Bruk lagrede verdier hvis tilgjengelig, ellers fall tilbake til DOM eller original data
+                const savedSelection = savedApprovalSelections[approvalId];
+                const enInput = document.getElementById(`en-translation-${approvalId}`);
+                const nameEn = savedSelection?.enTranslation || enInput?.value.trim() || data.data.name_no;
+
+                if (type === 'item') {
+                    const categorySelect = document.getElementById(`category-${approvalId}`);
+                    const selectedCategory = savedSelection?.category || categorySelect?.value || data.data.category;
+
+                    await db.collection('globalItems').add({
+                        name_no: data.data.name_no,
+                        name_en: nameEn,
+                        category: selectedCategory,
+                        approved: true,
+                        createdBy: data.submittedBy,
+                        createdAt: data.submittedAt,
+                        approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        approvedBy: auth.currentUser.uid,
+                        usageCount: 0
+                    });
+                } else if (type === 'category') {
+                    // Sjekk om kategori allerede eksisterer
+                    const existingCat = await db.collection('globalCategories')
+                        .where('name_no', '==', data.data.name_no)
+                        .where('approved', '==', true)
+                        .limit(1)
+                        .get();
+
+                    if (!existingCat.empty) {
+                        alert(`Kategorien "${data.data.name_no}" eksisterer allerede!`);
+                        return;
+                    }
+
+                    const maxOrderSnapshot = await db.collection('globalCategories')
+                        .orderBy('order', 'desc')
+                        .limit(1)
+                        .get();
+
+                    const maxOrder = maxOrderSnapshot.empty ? 0 : maxOrderSnapshot.docs[0].data().order;
+
+                    await db.collection('globalCategories').add({
+                        name_no: data.data.name_no,
+                        name_en: nameEn,
+                        emoji: data.data.emoji || '📦',
+                        order: maxOrder + 1,
+                        approved: true,
+                        createdBy: data.submittedBy,
+                        createdAt: data.submittedAt,
+                        approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        approvedBy: auth.currentUser.uid
+                    });
+                }
+
+                await approvalDoc.ref.update({
+                    status: 'approved',
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reviewedBy: auth.currentUser.uid
+                });
+
+                // Rens opp lagrede verdier
+                delete savedApprovalSelections[approvalId];
+            } catch (error) {
+                console.error('Error approving:', error);
+                alert('Kunne ikke godkjenne: ' + error.message);
+            }
+        }
+
+        async function rejectItem(approvalId) {
+            try {
+                await db.collection('pendingApprovals').doc(approvalId).update({
+                    status: 'rejected',
+                    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reviewedBy: auth.currentUser.uid
+                });
+
+                // Rens opp lagrede verdier
+                delete savedApprovalSelections[approvalId];
+            } catch (error) {
+                console.error('Error rejecting:', error);
+                alert('Kunne ikke avslå: ' + error.message);
+            }
+        }
+
+        function renderItems(items) {
+            const container = document.getElementById('itemsList');
+
+            let html = '';
+
+            // Add breadcrumb if viewing a specific category
+            if (currentView === 'category' && selectedCategory) {
+                html += `
+                    <div class="breadcrumb">
+                        <span class="breadcrumb-link" onclick="backToAllItems()">Varer</span>
+                        <span>›</span>
+                        <span class="breadcrumb-current">${selectedCategory}</span>
+                    </div>
+                    <button class="back-button" onclick="backToAllItems()">
+                        ← Tilbake til alle varer
+                    </button>
+                    <div style="background: rgba(102, 126, 234, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 16px; text-align: center; font-weight: 600; color: var(--primary);">
+                        📦 ${items.length} varer i denne kategorien
+                    </div>
+                `;
+            }
+
+            html += items.map(item => `
+                <div class="item-row">
+                    <div>
+                        <span class="name">${item.name_no}</span>
+                        ${currentView === 'all' ? `<span class="category">${item.category}</span>` : ''}
+                    </div>
+                    <div class="actions">
+                        <button class="btn-small" onclick="editItem('${item.id}')" title="Rediger">✎</button>
+                        <button class="btn-small btn-delete" onclick="deleteItem('${item.id}', '${item.name_no}')" title="Slett">✕</button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderCategories(categories) {
+            const container = document.getElementById('categoriesList');
+            container.innerHTML = categories.map(cat => {
+                const itemCount = allItems.filter(item => item.category === cat.name_no).length;
+                return `
+                    <div class="item-row category-row" onclick="viewCategory('${cat.name_no.replace(/'/g, "\\'")}')">
+                        <div style="flex: 1; cursor: pointer;">
+                            <span class="name">${cat.emoji} ${cat.name_no}</span>
+                            <span class="item-count">${itemCount} varer</span>
+                        </div>
+                        <div class="actions" onclick="event.stopPropagation()">
+                            <button class="btn-small" onclick="editCategory('${cat.id}')" title="Rediger">✎</button>
+                            <button class="btn-small btn-delete" onclick="deleteCategory('${cat.id}', '${cat.name_no}')" title="Slett">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'items') {
+                document.getElementById('itemsTab').style.display = 'block';
+                document.getElementById('categoriesTab').style.display = 'none';
+            } else {
+                document.getElementById('itemsTab').style.display = 'none';
+                document.getElementById('categoriesTab').style.display = 'block';
+            }
+        }
+
+        function viewCategory(categoryName) {
+            currentView = 'category';
+            selectedCategory = categoryName;
+
+            // Update URL hash
+            window.location.hash = `category=${encodeURIComponent(categoryName)}`;
+
+            // Switch to items tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.tab[onclick*="items"]').classList.add('active');
+            document.getElementById('itemsTab').style.display = 'block';
+            document.getElementById('categoriesTab').style.display = 'none';
+
+            // Filter and render items for this category
+            const filteredItems = allItems.filter(item => item.category === categoryName);
+            renderItems(filteredItems);
+        }
+
+        function backToAllItems() {
+            currentView = 'all';
+            selectedCategory = null;
+
+            // Clear URL hash
+            window.location.hash = '';
+
+            // Render all items
+            renderItems(allItems);
+        }
+
+        // Handle browser back/forward navigation
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash.startsWith('category=')) {
+                const categoryName = decodeURIComponent(hash.substring(9));
+                if (currentView !== 'category' || selectedCategory !== categoryName) {
+                    viewCategory(categoryName);
+                }
+            } else if (currentView === 'category') {
+                backToAllItems();
+            }
+        });
+
+        // Check hash on load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash.startsWith('category=')) {
+                const categoryName = decodeURIComponent(hash.substring(9));
+                setTimeout(() => viewCategory(categoryName), 500);
+            }
+        });
+
+        let editingItemId = null;
+
+        async function editItem(itemId) {
+            const item = allItems.find(i => i.id === itemId);
+
+            if (!item) {
+                alert('Fant ikke varen!');
+                return;
+            }
+
+            // Store the ID we're editing
+            editingItemId = itemId;
+
+            // Populate the form
+            document.getElementById('editItemNameNo').value = item.name_no;
+            document.getElementById('editItemNameEn').value = item.name_en || item.name_no;
+
+            // Populate category dropdown
+            const categorySelect = document.getElementById('editItemCategory');
+            categorySelect.innerHTML = allCategories.map(cat => `
+                <option value="${cat.name_no}" ${cat.name_no === item.category ? 'selected' : ''}>
+                    ${cat.emoji || '📦'} ${cat.name_no}
+                </option>
+            `).join('');
+
+            // Show modal
+            document.getElementById('editItemModal').classList.add('active');
+
+            // Focus on name field
+            setTimeout(() => {
+                document.getElementById('editItemNameNo').focus();
+            }, 100);
+        }
+
+        function closeEditItemModal() {
+            document.getElementById('editItemModal').classList.remove('active');
+            editingItemId = null;
+        }
+
+        async function saveItemEdit() {
+            if (!editingItemId) return;
+
+            const newNameNo = document.getElementById('editItemNameNo').value.trim();
+            const newNameEn = document.getElementById('editItemNameEn').value.trim();
+            const newCategory = document.getElementById('editItemCategory').value.trim();
+
+            if (!newNameNo) {
+                alert('Norsk navn kan ikke være tomt!');
+                return;
+            }
+
+            if (!newCategory) {
+                alert('Kategori må velges!');
+                return;
+            }
+
+            try {
+                await db.collection('globalItems').doc(editingItemId).update({
+                    name_no: newNameNo,
+                    name_en: newNameEn || newNameNo,
+                    category: newCategory
+                });
+
+                closeEditItemModal();
+                // onSnapshot will automatically refresh
+            } catch (error) {
+                alert('Kunne ikke oppdatere: ' + error.message);
+            }
+        }
+
+        async function deleteItem(itemId, itemName) {
+            if (confirm(`Er du sikker på at du vil slette "${itemName}"?`)) {
+                try {
+                    await db.collection('globalItems').doc(itemId).delete();
+                    // onSnapshot will automatically refresh
+                } catch (error) {
+                    alert('Kunne ikke slette: ' + error.message);
+                }
+            }
+        }
+
+        let editingCategoryId = null;
+
+        function editCategory(catId) {
+            const cat = allCategories.find(c => c.id === catId);
+
+            if (!cat) {
+                alert('Fant ikke kategorien!');
+                return;
+            }
+
+            // Store the ID we're editing
+            editingCategoryId = catId;
+
+            // Populate the form
+            document.getElementById('editCategoryName').value = cat.name_no;
+            document.getElementById('editCategoryEmoji').value = cat.emoji || '📦';
+
+            // Show modal
+            document.getElementById('editCategoryModal').classList.add('active');
+
+            // Focus on name field
+            setTimeout(() => {
+                document.getElementById('editCategoryName').focus();
+            }, 100);
+        }
+
+        function closeEditCategoryModal() {
+            document.getElementById('editCategoryModal').classList.remove('active');
+            editingCategoryId = null;
+        }
+
+        async function saveCategoryEdit() {
+            if (!editingCategoryId) return;
+
+            const newName = document.getElementById('editCategoryName').value.trim();
+            const newEmoji = document.getElementById('editCategoryEmoji').value.trim();
+
+            if (!newName) {
+                alert('Kategorinavn kan ikke være tomt!');
+                return;
+            }
+
+            if (!newEmoji) {
+                alert('Emoji kan ikke være tomt!');
+                return;
+            }
+
+            try {
+                await db.collection('globalCategories').doc(editingCategoryId).update({
+                    name_no: newName,
+                    emoji: newEmoji
+                });
+                closeEditCategoryModal();
+            } catch (error) {
+                alert('Kunne ikke oppdatere: ' + error.message);
+            }
+        }
+
+        async function deleteCategory(catId, catName) {
+            if (confirm(`Er du sikker på at du vil slette kategorien "${catName}"?`)) {
+                try {
+                    await db.collection('globalCategories').doc(catId).delete();
+                    // onSnapshot will automatically refresh
+                } catch (error) {
+                    alert('Kunne ikke slette: ' + error.message);
+                }
+            }
+        }
+
+        function getSimilarity(str1, str2) {
+            const s1 = str1.toLowerCase().trim();
+            const s2 = str2.toLowerCase().trim();
+
+            // Levenshtein distance
+            const matrix = [];
+            for (let i = 0; i <= s2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= s1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= s2.length; i++) {
+                for (let j = 1; j <= s1.length; j++) {
+                    if (s2.charAt(i - 1) === s1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            const distance = matrix[s2.length][s1.length];
+            const maxLen = Math.max(s1.length, s2.length);
+            return 1 - (distance / maxLen);
+        }
+
+        // Store duplicate data globally for deletion
+        let duplicateData = null;
+
+        async function checkDuplicates() {
+            console.log('Checking for duplicates...');
+            const duplicateItems = {};
+            const duplicateCategories = {};
+
+            // Find duplicate items (same name_no and category)
+            allItems.forEach(item => {
+                const key = `${item.name_no.toLowerCase().trim()}_${item.category}`;
+                if (!duplicateItems[key]) {
+                    duplicateItems[key] = [];
+                }
+                duplicateItems[key].push(item);
+            });
+
+            // Find duplicate categories (same name_no)
+            allCategories.forEach(cat => {
+                const key = cat.name_no.toLowerCase().trim();
+                if (!duplicateCategories[key]) {
+                    duplicateCategories[key] = [];
+                }
+                duplicateCategories[key].push(cat);
+            });
+
+            // Show results
+            const itemDups = Object.entries(duplicateItems).filter(([_, items]) => items.length > 1);
+            const catDups = Object.entries(duplicateCategories).filter(([_, cats]) => cats.length > 1);
+
+            // Store for later deletion
+            duplicateData = { itemDups, catDups };
+
+            let message = '';
+
+            if (itemDups.length > 0) {
+                message += `📦 Varer med duplikater (${itemDups.length}):\n`;
+                itemDups.forEach(([key, items]) => {
+                    message += `\n"${items[0].name_no}" (${items[0].category}): ${items.length} forekomster\n`;
+                    message += `  IDs: ${items.map(i => i.id.substring(0, 8)).join(', ')}\n`;
+                });
+            } else {
+                message += '✅ Ingen duplikate varer\n';
+            }
+
+            message += '\n';
+
+            if (catDups.length > 0) {
+                message += `📁 Kategorier med duplikater (${catDups.length}):\n`;
+                catDups.forEach(([key, cats]) => {
+                    message += `\n"${cats[0].name_no}": ${cats.length} forekomster\n`;
+                    message += `  IDs: ${cats.map(c => c.id.substring(0, 8)).join(', ')}\n`;
+                });
+            } else {
+                message += '✅ Ingen duplikate kategorier\n';
+            }
+
+            // Find fuzzy duplicates (similar items that might be the same)
+            const fuzzyDuplicates = [];
+            for (let i = 0; i < allItems.length; i++) {
+                for (let j = i + 1; j < allItems.length; j++) {
+                    const item1 = allItems[i];
+                    const item2 = allItems[j];
+
+                    // Only compare items in the same category
+                    if (item1.category !== item2.category) continue;
+
+                    const similarity = getSimilarity(item1.name_no, item2.name_no);
+                    if (similarity > 0.7 && similarity < 1.0) { // 70% similar but not identical
+                        fuzzyDuplicates.push({
+                            items: [item1, item2],
+                            similarity: Math.round(similarity * 100)
+                        });
+                    }
+                }
+            }
+
+            if (fuzzyDuplicates.length > 0) {
+                message += `\n🔎 Mulige duplikater (${fuzzyDuplicates.length}):\n`;
+                fuzzyDuplicates.slice(0, 10).forEach(({ items, similarity }) => {
+                    message += `\n"${items[0].name_no}" ↔ "${items[1].name_no}" (${similarity}% likt)\n`;
+                    message += `  Kategori: ${items[0].category}\n`;
+                });
+                if (fuzzyDuplicates.length > 10) {
+                    message += `\n... og ${fuzzyDuplicates.length - 10} flere\n`;
+                }
+            }
+
+            // Show modal with results
+            document.getElementById('duplicatesReport').textContent = message;
+
+            // Show delete button only if there are duplicates
+            const deleteBtn = document.getElementById('deleteDuplicatesBtn');
+            if (itemDups.length > 0 || catDups.length > 0) {
+                deleteBtn.style.display = 'block';
+            } else {
+                deleteBtn.style.display = 'none';
+            }
+
+            document.getElementById('duplicatesModal').classList.add('active');
+        }
+
+        function closeDuplicatesModal() {
+            document.getElementById('duplicatesModal').classList.remove('active');
+            duplicateData = null;
+            isDeletingDuplicates = false; // Reset flag when closing
+        }
+
+        let isDeletingDuplicates = false;
+
+        async function deleteDuplicatesFromModal() {
+            console.log('=== deleteDuplicatesFromModal START ===');
+
+            // Prevent multiple simultaneous executions
+            if (isDeletingDuplicates) {
+                console.log('Already deleting, ignoring click');
+                return;
+            }
+
+            if (!duplicateData) {
+                console.error('No duplicate data found');
+                alert('Ingen duplikatdata funnet!');
+                return;
+            }
+
+            const { itemDups, catDups } = duplicateData;
+            console.log('Item dups to delete:', itemDups.length);
+            console.log('Category dups to delete:', catDups.length);
+
+            if (itemDups.length === 0 && catDups.length === 0) {
+                alert('Ingen duplikater å slette!');
+                return;
+            }
+
+            // Set flag and disable button
+            isDeletingDuplicates = true;
+            const deleteBtn = document.getElementById('deleteDuplicatesBtn');
+            deleteBtn.disabled = true;
+            deleteBtn.style.opacity = '0.5';
+            deleteBtn.style.cursor = 'not-allowed';
+
+            let deletedItems = 0;
+            let deletedCategories = 0;
+
+            // Show progress
+            document.getElementById('duplicatesReport').textContent = '⏳ Sletter duplikater...';
+
+            try {
+                // Collect all IDs to delete
+                const itemsToDelete = [];
+                const categoriesToDelete = [];
+
+                // Collect duplicate items (keep first, delete rest)
+                // LIMIT: Only delete 10 items per click to avoid quota
+                console.log('Collecting items to delete...');
+                let collectedCount = 0;
+                for (const [_, items] of itemDups) {
+                    for (let i = 1; i < items.length; i++) {
+                        if (collectedCount >= 10) break;
+                        itemsToDelete.push(items[i].id);
+                        collectedCount++;
+                    }
+                    if (collectedCount >= 10) break;
+                }
+                deletedItems = itemsToDelete.length;
+                console.log(`Items to delete (max 10): ${deletedItems}`);
+
+                // Collect duplicate categories (keep first, delete rest)
+                console.log('Collecting categories to delete...');
+                for (const [_, cats] of catDups) {
+                    for (let i = 1; i < cats.length; i++) {
+                        categoriesToDelete.push(cats[i].id);
+                    }
+                }
+                deletedCategories = categoriesToDelete.length;
+                console.log(`Categories to delete: ${deletedCategories}`);
+
+                // Delete in one small batch (max 10 items)
+                console.log(`Deleting ${itemsToDelete.length} items...`);
+
+                const batch = db.batch();
+                itemsToDelete.forEach(id => {
+                    batch.delete(db.collection('globalItems').doc(id));
+                });
+
+                await batch.commit();
+                console.log(`✅ Deleted ${itemsToDelete.length} duplicate items`);
+
+                console.log('✅ Deletion complete!');
+
+                // Re-enable button
+                deleteBtn.disabled = false;
+                deleteBtn.style.opacity = '1';
+                deleteBtn.style.cursor = 'pointer';
+                isDeletingDuplicates = false;
+
+                // Update report - encourage clicking again
+                document.getElementById('duplicatesReport').textContent =
+                    `✅ Slettet ${deletedItems} duplikater!\n\nKlikk "Sjekk duplikater" for å se om det er flere.`;
+
+                console.log('=== deleteDuplicatesFromModal COMPLETE ===');
+
+            } catch (error) {
+                console.error('=== ERROR during deletion ===', error);
+                document.getElementById('duplicatesReport').textContent = `❌ Feil under sletting:\n\n${error.message}`;
+                alert('Feil under sletting: ' + error.message);
+
+                // Re-enable button and reset flag on error
+                deleteBtn.disabled = false;
+                deleteBtn.style.opacity = '1';
+                deleteBtn.style.cursor = 'pointer';
+                isDeletingDuplicates = false;
+            }
+        }
+
+        async function addMissingItems() {
+            const missingItems = [
+                // Norske snacks
+                { name_no: 'Ostepop', name_en: 'Cheese puffs', category: 'Godteri & Snacks' },
+                { name_no: 'Smash', name_en: 'Smash', category: 'Godteri & Snacks' },
+                { name_no: 'Nidar Smil', name_en: 'Nidar Smil', category: 'Godteri & Snacks' },
+                { name_no: 'Sørlandschips', name_en: 'Sørlandschips', category: 'Godteri & Snacks' },
+                { name_no: 'Kims chips', name_en: 'Kims chips', category: 'Godteri & Snacks' },
+                { name_no: 'Maarud chips', name_en: 'Maarud chips', category: 'Godteri & Snacks' },
+                { name_no: 'Nugatti', name_en: 'Nugatti', category: 'Godteri & Snacks' },
+                { name_no: 'First Price ostepop', name_en: 'First Price cheese puffs', category: 'Godteri & Snacks' },
+                { name_no: 'Sørlandskjeks', name_en: 'Sørland cookies', category: 'Godteri & Snacks' },
+                { name_no: 'Ballerina kjeks', name_en: 'Ballerina cookies', category: 'Godteri & Snacks' },
+                { name_no: 'Hm chips', name_en: 'Hm chips', category: 'Godteri & Snacks' },
+                { name_no: 'Ritz kjeks', name_en: 'Ritz crackers', category: 'Godteri & Snacks' },
+                { name_no: 'Pringles', name_en: 'Pringles', category: 'Godteri & Snacks' },
+                { name_no: 'Crispo', name_en: 'Crispo', category: 'Godteri & Snacks' },
+
+                // Posten-kategorien
+                { name_no: 'Pakke', name_en: 'Package', category: 'Posten' }
+            ];
+
+            if (!confirm(`Vil du legge til ${missingItems.length} manglende varer?\n\n- Norske snacks (${missingItems.length - 1} stk)\n- Pakke i Posten (1 stk)`)) {
+                return;
+            }
+
+            let added = 0;
+            let skipped = 0;
+
+            for (const item of missingItems) {
+                // Check if already exists
+                const exists = allItems.some(existing =>
+                    existing.name_no.toLowerCase().trim() === item.name_no.toLowerCase().trim() &&
+                    existing.category === item.category
+                );
+
+                if (exists) {
+                    console.log(`Skipping "${item.name_no}" - already exists`);
+                    skipped++;
+                    continue;
+                }
+
+                try {
+                    await db.collection('globalItems').add({
+                        name_no: item.name_no,
+                        name_en: item.name_en,
+                        category: item.category,
+                        approved: true,
+                        addedBy: 'admin',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    added++;
+                    console.log(`Added: ${item.name_no}`);
+                } catch (error) {
+                    console.error(`Failed to add "${item.name_no}":`, error);
+                }
+            }
+
+            alert(`✅ Ferdig!\n\nLagt til: ${added} varer\nHoppet over (finnes fra før): ${skipped} varer`);
+        }
+
+        // Search items
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchItems');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+
+                    // Start with all items or category items
+                    let itemsToSearch = allItems;
+                    if (currentView === 'category' && selectedCategory) {
+                        itemsToSearch = allItems.filter(item => item.category === selectedCategory);
+                    }
+
+                    const filtered = itemsToSearch.filter(item =>
+                        item.name_no.toLowerCase().includes(query) ||
+                        item.category.toLowerCase().includes(query)
+                    );
+                    renderItems(filtered);
+                });
+            }
+        });
+
+        // Language feature toggle - aktiverer/deaktiverer språkvalg i appen
+        function toggleLanguageFeature() {
+            const currentStatus = localStorage.getItem('languageFeatureEnabled') === 'true';
+            const newStatus = !currentStatus;
+
+            localStorage.setItem('languageFeatureEnabled', newStatus);
+
+            // Update button
+            updateLanguageToggleButton();
+
+            // If disabling, reset app to Norwegian
+            if (!newStatus) {
+                localStorage.setItem('language', 'no');
+            }
+        }
+
+        function updateLanguageToggleButton() {
+            const enabled = localStorage.getItem('languageFeatureEnabled') === 'true';
+            const toggleBtn = document.getElementById('langToggleBtn');
+
+            if (toggleBtn) {
+                toggleBtn.textContent = `🌐 Språkvalg: ${enabled ? '✅' : '❌'}`;
+            }
+        }
+
+    </script>
+</body>
+</html>

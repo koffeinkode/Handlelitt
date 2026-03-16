@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Admin - Handle Litt</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 16px;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .success {
+            background: #c8e6c9;
+            color: #2e7d32;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        .error {
+            background: #ffcdd2;
+            color: #c62828;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Setup Admin</h1>
+        <p>Klikk på knappen under for å logge inn og sette deg selv opp som admin.</p>
+
+        <button class="btn" id="loginBtn" onclick="setupAdmin()">Logg inn og setup admin</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        async function setupAdmin() {
+            const status = document.getElementById('status');
+            status.innerHTML = '<p>Logger inn...</p>';
+
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+
+                status.innerHTML = `
+                    <div class="info">
+                        <strong>Din brukerinfo:</strong><br>
+                        Email: ${user.email}<br>
+                        UID: ${user.uid}
+                    </div>
+                    <p>Setter opp admin...</p>
+                `;
+
+                // Create or update admin config
+                await db.collection('admin').doc('config').set({
+                    adminUsers: [user.uid]
+                }, { merge: true });
+
+                status.innerHTML = `
+                    <div class="success">
+                        ✅ Admin-tilgang opprettet!<br><br>
+                        Du kan nå gå til <a href="/admin.html">admin.html</a>
+                    </div>
+                    <div class="info" style="margin-top: 16px;">
+                        <strong>Din brukerinfo:</strong><br>
+                        Email: ${user.email}<br>
+                        UID: ${user.uid}
+                    </div>
+                `;
+
+                document.getElementById('loginBtn').textContent = 'Gå til Admin Panel';
+                document.getElementById('loginBtn').onclick = () => window.location.href = '/admin.html';
+
+            } catch (error) {
+                status.innerHTML = `
+                    <div class="error">
+                        ❌ Feil: ${error.message}
+                    </div>
+                `;
+                console.error('Setup error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

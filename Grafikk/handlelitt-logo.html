@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Handlelitt Logo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            align-items: flex-start;
+            background: #f5f5f7;
+        }
+        .logo-container {
+            padding: 20px 40px;
+            border-radius: 12px;
+        }
+        .logo {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* Versjon 1: Oransje på hvit */
+        .v1 { background: white; }
+        .v1 .logo { color: #d97706; font-size: 48px; }
+
+        /* Versjon 2: Oransje på transparent */
+        .v2 { background: transparent; }
+        .v2 .logo { color: #d97706; font-size: 48px; }
+
+        /* Versjon 3: Hvit på oransje */
+        .v3 { background: #d97706; }
+        .v3 .logo { color: white; font-size: 48px; }
+
+        /* Versjon 4: Stor */
+        .v4 { background: white; }
+        .v4 .logo { color: #d97706; font-size: 72px; }
+
+        /* Versjon 5: Liten */
+        .v5 { background: white; }
+        .v5 .logo { color: #d97706; font-size: 24px; }
+
+        .label {
+            font-family: system-ui, sans-serif;
+            font-size: 12px;
+            color: #86868b;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="label">Oransje på hvit (48px)</div>
+        <div class="logo-container v1">
+            <h1 class="logo">Handlelitt</h1>
+        </div>
+    </div>
+
+    <div>
+        <div class="label">Oransje på transparent (48px)</div>
+        <div class="logo-container v2">
+            <h1 class="logo">Handlelitt</h1>
+        </div>
+    </div>
+
+    <div>
+        <div class="label">Hvit på oransje (48px)</div>
+        <div class="logo-container v3">
+            <h1 class="logo">Handlelitt</h1>
+        </div>
+    </div>
+
+    <div>
+        <div class="label">Stor (72px)</div>
+        <div class="logo-container v4">
+            <h1 class="logo">Handlelitt</h1>
+        </div>
+    </div>
+
+    <div>
+        <div class="label">Liten (24px)</div>
+        <div class="logo-container v5">
+            <h1 class="logo">Handlelitt</h1>
+        </div>
+    </div>
+</body>
+</html>

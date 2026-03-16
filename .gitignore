@@ -1,0 +1,22 @@
+firebase-config.js
+.env
+.env.*
+.DS_Store
+node_modules/
+
+# Firebase admin SDK-nøkler
+handle-litt-firebase-adminsdk-*.json
+*-adminsdk-*.json
+
+# Backup-filer (manuelle snapshots)
+index-backup-*.html
+index-broken.html
+index-email-feature.html
+index-v2.html
+SESSION-LOG-*.md
+
+# Firebase hosting cache
+.firebase/
+
+# Fontfiler (lokale referanser, brukes ikke av appen)
+Bricolage_Grotesque,Inter/

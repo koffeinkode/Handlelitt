@@ -737,8 +737,8 @@
             right: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-secondary);
-            opacity: 0.4;
+            color: var(--primary);
+            opacity: 0.5;
             pointer-events: none;
             z-index: 101;
             display: flex;
@@ -1030,9 +1030,60 @@
         }
 
         .sticky-footer .search-container {
-            margin-bottom: 12px;
+            margin-bottom: 0;
             position: relative;
             box-sizing: border-box;
+        }
+
+        .footer-handle {
+            display: flex;
+            justify-content: center;
+            padding: 2px 0 10px;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .footer-handle-bar {
+            width: 36px;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.12);
+            border-radius: 2px;
+            transition: background 0.15s ease;
+        }
+
+        .footer-handle:hover .footer-handle-bar,
+        .footer-handle:active .footer-handle-bar {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .sticky-footer.collapsed .search-container {
+            display: none;
+        }
+
+        .sticky-footer.collapsed .footer-handle {
+            padding: 4px 0;
+        }
+
+        .share-header-btn {
+            display: flex;
+            align-items: center;
+            padding: 7px 13px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s ease;
+            touch-action: manipulation;
+        }
+
+        .share-header-btn:active {
+            background: var(--primary-hover);
         }
 
         .action-buttons {
@@ -2380,7 +2431,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyASf48sq804zm9GD0cVMnN3ZLnjlKLog-4",
+            authDomain: "handle-litt.firebaseapp.com",
+            projectId: "handle-litt",
+            storageBucket: "handle-litt.firebasestorage.app",
+            messagingSenderId: "16911445254",
+            appId: "1:16911445254:web:456f1aa3c524632e2f0287",
+            measurementId: "G-P4GFWBFM3S"
+        };
+    </script>
 
     <!-- EmailJS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -2396,6 +2457,9 @@
         <header>
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="Grafikk/handlelitt-logo-clean.png" alt="Handlelitt" id="app-title" style="height: 28px; cursor: pointer; user-select: none;">
+                <button class="share-header-btn" id="collaborateBtn" onclick="showCollaborateModal()">
+                    <span id="collaborateBtnText">Del liste</span>
+                </button>
             </div>
             <div style="position: relative;">
                 <button class="burger-menu-btn" onclick="toggleBurgerMenu()" aria-label="Meny">☰</button>
@@ -2456,7 +2520,10 @@
     </div>
 
     <!-- Sticky Footer -->
-    <div class="sticky-footer">
+    <div class="sticky-footer" id="stickyFooter">
+        <div class="footer-handle" onclick="toggleFooter()">
+            <div class="footer-handle-bar"></div>
+        </div>
         <div class="search-container">
             <textarea id="searchInput" placeholder="" rows="1"></textarea>
             <div class="search-icon-right" id="searchIconRight">
@@ -2479,14 +2546,6 @@
             </button>
             <input type="file" id="recipeImageInput" accept="image/*" capture="environment" style="display:none" onchange="handleRecipeImageSelected(event)">
             <div id="autocomplete"></div>
-        </div>
-        <div class="action-buttons">
-            <button class="icon-btn" id="collaborateBtn" aria-label="Del liste" title="Del liste" onclick="showCollaborateModal()">
-                <span id="collaborateBtnText" style="font-size: 13px; font-weight: 600;">Del liste</span>
-            </button>
-            <button class="icon-btn" id="joinBtn" aria-label="Koble til liste" title="Koble til liste" onclick="showJoinListModal()">
-                <span style="font-size: 13px; font-weight: 600;">Koble til liste</span>
-            </button>
         </div>
     </div>
 
@@ -4426,6 +4485,14 @@
 
         function setupBadgeListeners() {
             // Badge removed - function kept for compatibility
+        }
+
+        function toggleFooter() {
+            const footer = document.getElementById('stickyFooter');
+            if (footer) {
+                footer.classList.toggle('collapsed');
+                updateStickyFooterHeight();
+            }
         }
 
         function updateStickyFooterHeight() {
@@ -6831,11 +6898,9 @@
                 const logo = document.getElementById('app-title');
                 if (logo) logo.src = 'Grafikk/spillelitt-logo-clean.png';
 
-                // Skjul søkefelt og del/koble-knapper
+                // Skjul søkefelt
                 const searchContainer = document.querySelector('.search-container');
-                const actionButtons = document.querySelector('.action-buttons');
                 if (searchContainer) searchContainer.style.display = 'none';
-                if (actionButtons) actionButtons.style.display = 'none';
 
                 renderGameUI();
                 if (incomingSession.status === 'suddenDeath') {
@@ -7273,7 +7338,7 @@
                     await loadModalParticipants(activeListId);
 
                     // Update collaborate button color (in case we removed the last participant)
-                    const collaborateBtn = document.querySelector('.icon-btn[onclick="showCollaborateModal()"]');
+                    const collaborateBtn = document.getElementById('collaborateBtn');
                     if (collaborateBtn) {
                         updateCollaborateButtonColor(activeListId, collaborateBtn);
                     }
@@ -8916,11 +8981,9 @@
             const logo = document.getElementById('app-title');
             if (logo) logo.src = 'Grafikk/spillelitt-logo-clean.png';
 
-            // Skjul søkefelt og del/koble-knapper
+            // Skjul søkefelt
             const searchContainer = document.querySelector('.search-container');
-            const actionButtons = document.querySelector('.action-buttons');
             if (searchContainer) searchContainer.style.display = 'none';
-            if (actionButtons) actionButtons.style.display = 'none';
 
             renderGameUI();
             showGameRules();
@@ -9077,11 +9140,9 @@
             const scoreboard = document.getElementById('gameScoreboard');
             if (scoreboard) scoreboard.remove();
 
-            // Vis søkefelt og del/koble-knapper igjen
+            // Vis søkefelt igjen
             const searchContainer = document.querySelector('.search-container');
-            const actionButtons = document.querySelector('.action-buttons');
             if (searchContainer) searchContainer.style.display = '';
-            if (actionButtons) actionButtons.style.display = '';
 
             renderList();
             updateGameMenuVisibility();
